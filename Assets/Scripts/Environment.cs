@@ -6,7 +6,7 @@ public class Environment : MonoBehaviour
 {
     [SerializeField] private List<EnvironmentTile> AccessibleTiles;
     [SerializeField] private List<EnvironmentTile> InaccessibleTiles;
-    [SerializeField] private Vector2Int Size;
+    [SerializeField] public Vector2Int Size;
     [SerializeField] private float AccessiblePercentage;
 
     private EnvironmentTile[][] mMap;
@@ -18,7 +18,10 @@ public class Environment : MonoBehaviour
     private const float TileSize = 10.0f;
     private const float TileHeight = 2.5f;
 
-    public EnvironmentTile Start { get; private set; }
+    public List<Vector2Int> AccessibleTilesInMap;
+    public EnvironmentTile CharStart { get; private set; }
+    public EnvironmentTile RobotStart { get; private set; }
+    public EnvironmentTile OrcStart { get; private set; }
 
     private void Awake()
     {
@@ -79,14 +82,16 @@ public class Environment : MonoBehaviour
         int halfWidth = Size.x / 2;
         int halfHeight = Size.y / 2;
         Vector3 position = new Vector3( -(halfWidth * TileSize), 0.0f, -(halfHeight * TileSize) );
-        bool start = true;
+        bool charStart = true;
+        bool robotStart = true;
+        bool orcStart = true;
 
         for ( int x = 0; x < Size.x; ++x)
         {
             mMap[x] = new EnvironmentTile[Size.y];
             for ( int y = 0; y < Size.y; ++y)
             {
-                bool isAccessible = start || Random.value < AccessiblePercentage;
+                bool isAccessible = charStart || Random.value < AccessiblePercentage;
                 List<EnvironmentTile> tiles = isAccessible ? AccessibleTiles : InaccessibleTiles;
                 EnvironmentTile prefab = tiles[Random.Range(0, tiles.Count)];
                 EnvironmentTile tile = Instantiate(prefab, position, Quaternion.identity, transform);
@@ -96,13 +101,43 @@ public class Environment : MonoBehaviour
                 mMap[x][y] = tile;
                 mAll.Add(tile);
 
-                if(start)
+                if (isAccessible)
                 {
-                    Start = tile;
+                    AccessibleTilesInMap.Add(new Vector2Int (x, y));
                 }
 
+                if(charStart)
+                {
+                    CharStart = tile;
+                    tile.IsWin = true;
+                    charStart = false;
+                }
+
+                if (robotStart)
+                {
+                    float distanceToMax = Mathf.Sqrt(Mathf.Pow(Size.x - x, 2) + Mathf.Pow(Size.y - y, 2));
+                    float prob = -1 * Mathf.Pow(1 / distanceToMax, 2) + 1;
+                    float r = Random.Range(0.0f, 1.0f);
+                    if (r > prob && isAccessible)
+                    {
+                        RobotStart = tile;
+                        robotStart = false;
+                    }
+                }
+                if (orcStart)
+                {
+                    float distanceToMax = Mathf.Sqrt(Mathf.Pow(Size.x - x, 2) + Mathf.Pow(Size.y - y, 2));
+                    float prob = -1 * Mathf.Pow(1 / distanceToMax, 2) + 1;
+                    float o = Random.Range(0.0f, 1.0f);
+                    if (o > prob && isAccessible)
+                    {
+                        OrcStart = tile;
+                        orcStart = false;
+                    }
+                }
+                
                 position.z += TileSize;
-                start = false;
+                
             }
 
             position.x += TileSize;
@@ -112,7 +147,7 @@ public class Environment : MonoBehaviour
 
     private void SetupConnections()
     {
-        // Currently we are only setting up connections between adjacnt nodes
+        // Currently we are only setting up connections between adjacent nodes
         for (int x = 0; x < Size.x; ++x)
         {
             for (int y = 0; y < Size.y; ++y)
@@ -122,11 +157,27 @@ public class Environment : MonoBehaviour
                 if (x > 0)
                 {
                     tile.Connections.Add(mMap[x - 1][y]);
+                    if (y > 0)
+                    {
+                        tile.Connections.Add(mMap[x - 1][y - 1]);
+                    }
+                    if (y < Size.y - 1)
+                    {
+                        tile.Connections.Add(mMap[x - 1][y + 1]);
+                    }
                 }
 
                 if (x < Size.x - 1)
                 {
                     tile.Connections.Add(mMap[x + 1][y]);
+                    if (y > 0)
+                    {
+                        tile.Connections.Add(mMap[x + 1][y - 1]);
+                    }
+                    if (y < Size.y - 1)
+                    {
+                        tile.Connections.Add(mMap[x + 1][y + 1]);
+                    }
                 }
 
                 if (y > 0)
@@ -290,5 +341,15 @@ public class Environment : MonoBehaviour
         mLastSolution = result;
 
         return result;
+    }
+
+    public EnvironmentTile GetTileAtPosition(Vector2Int position)
+    {
+        int tile = position.x * position.y;
+
+        EnvironmentTile result = mAll[tile];
+
+        return result;
+        
     }
 }
