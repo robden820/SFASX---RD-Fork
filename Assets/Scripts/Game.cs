@@ -79,25 +79,32 @@ public class Game : MonoBehaviour
              mRobot.GoTo(mRobotRoute);
         }
 
-        if (!mOrc.moving)
+        if (mOrc.spottedPlayer || (mOrc.trackingPlayer && !mOrc.moving))
         {
-            EnvironmentTile tile = new EnvironmentTile();
+            List<EnvironmentTile> mOrcRoute = mMap.Solve(mOrc.CurrentPosition, mCharacter.CurrentPosition);
+            mOrc.GoTo(mOrcRoute);
+            mOrc.spottedPlayer = false;
+            mOrc.trackingPlayer = true;
+        }
+        else if (!mOrc.moving)
+        {
+            int x = Random.Range(0, mMap.Size.x);
+            int y = Random.Range(0, mMap.Size.y);
+            Vector2Int position = new Vector2Int(Random.Range(0, mMap.Size.x), Random.Range(0, mMap.Size.y));
 
-            if (mOrc.spottedPlayer)
-            {
-                Debug.Log("Moving towards player");
-                tile = mCharacter.CurrentPosition;
-            }
-            else
-            {
-                int x = Random.Range(0, mMap.Size.x);
-                int y = Random.Range(0, mMap.Size.y);
-                Vector2Int position = new Vector2Int(Random.Range(0, mMap.Size.x), Random.Range(0, mMap.Size.y));
+            EnvironmentTile tile = mMap.GetTileAtPosition(position);
 
-                tile = mMap.GetTileAtPosition(position);
-            }
             List<EnvironmentTile> mOrcRoute = mMap.Solve(mOrc.CurrentPosition, tile);
             mOrc.GoTo(mOrcRoute);
+        }
+
+        if (mRobot.CurrentPosition.IsWin)
+        {
+            Debug.Log("YOu have won the game");
+        }
+        else if (mCharacter.CurrentPosition == mOrc.CurrentPosition)
+        {
+            Debug.Log("You have lost the game");
         }
     }
 
