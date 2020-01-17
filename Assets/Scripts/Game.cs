@@ -81,11 +81,21 @@ public class Game : MonoBehaviour
 
         if (!mOrc.moving)
         {
-            int x = Random.Range(0, mMap.Size.x);
-            int y = Random.Range(0, mMap.Size.y);
-            Vector2Int position = new Vector2Int (Random.Range(0, mMap.Size.x), Random.Range(0, mMap.Size.y));
+            EnvironmentTile tile = new EnvironmentTile();
 
-            EnvironmentTile tile = mMap.GetTileAtPosition(position);
+            if (mOrc.spottedPlayer)
+            {
+                Debug.Log("Moving towards player");
+                tile = mCharacter.CurrentPosition;
+            }
+            else
+            {
+                int x = Random.Range(0, mMap.Size.x);
+                int y = Random.Range(0, mMap.Size.y);
+                Vector2Int position = new Vector2Int(Random.Range(0, mMap.Size.x), Random.Range(0, mMap.Size.y));
+
+                tile = mMap.GetTileAtPosition(position);
+            }
             List<EnvironmentTile> mOrcRoute = mMap.Solve(mOrc.CurrentPosition, tile);
             mOrc.GoTo(mOrcRoute);
         }

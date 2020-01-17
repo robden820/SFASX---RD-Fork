@@ -9,10 +9,41 @@ public class Orc : MonoBehaviour
     public EnvironmentTile CurrentPosition { get; set; }
 
     public bool moving { get; set; }
+    public bool spottedPlayer { get; set; }
 
     void Start()
     {
         moving = false;
+        spottedPlayer = false;
+    }
+
+    void Update()
+    {
+        if (!spottedPlayer)
+        {
+            Vector3 startPos = transform.position;
+            startPos.y += 0.05f;
+            float startAngle = 200 * -0.5f;
+            float endAngle = 200 * 0.5f;
+            float increment = 200 / 20;
+
+            RaycastHit hit;
+            for (float i = startAngle; i <= endAngle; i += increment)
+            {
+                Vector3 targetPos = (Quaternion.Euler(0, i, 0) * transform.forward).normalized * 20f;
+
+                if (Physics.Raycast(startPos, targetPos, out hit, 20f))
+                {
+                    GameObject hitObject = hit.transform.gameObject;
+                    if (hitObject.tag == "Player")
+                    {
+                        Debug.DrawRay(startPos, targetPos * hit.distance, Color.red);
+                        Debug.Log("PLayer spotted");
+                        spottedPlayer = true;
+                    }
+                }
+            }
+        } 
     }
 
     private IEnumerator DoMove(Vector3 position, Vector3 destination)
