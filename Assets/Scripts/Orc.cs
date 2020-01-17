@@ -10,16 +10,27 @@ public class Orc : MonoBehaviour
 
     public bool moving { get; set; }
     public bool spottedPlayer { get; set; }
+    public bool trackingPlayer { get; set; }
 
     void Start()
     {
         moving = false;
         spottedPlayer = false;
+        trackingPlayer = false;
     }
 
     void Update()
     {
-        if (!spottedPlayer)
+        if (spottedPlayer || trackingPlayer)
+        {
+            SingleNodeMoveTime = 0.3f;
+        }
+        else
+        {
+            SingleNodeMoveTime = 0.5f;
+        }
+
+        if (!spottedPlayer && !trackingPlayer)
         {
             Vector3 startPos = transform.position;
             startPos.y += 0.05f;
@@ -38,7 +49,6 @@ public class Orc : MonoBehaviour
                     if (hitObject.tag == "Player")
                     {
                         Debug.DrawRay(startPos, targetPos * hit.distance, Color.red);
-                        Debug.Log("PLayer spotted");
                         spottedPlayer = true;
                     }
                 }
