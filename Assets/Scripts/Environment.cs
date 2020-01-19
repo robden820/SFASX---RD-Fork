@@ -18,7 +18,6 @@ public class Environment : MonoBehaviour
     private const float TileSize = 10.0f;
     private const float TileHeight = 2.5f;
 
-    public List<Vector2Int> AccessibleTilesInMap;
     public EnvironmentTile CharStart { get; private set; }
     public EnvironmentTile RobotStart { get; private set; }
     public EnvironmentTile OrcStart { get; private set; }
@@ -101,18 +100,19 @@ public class Environment : MonoBehaviour
                 mMap[x][y] = tile;
                 mAll.Add(tile);
 
-                if (isAccessible)
-                {
-                    AccessibleTilesInMap.Add(new Vector2Int (x, y));
-                }
-
+                // Makes the first tile the character start position
+                // Character start is the tile the charcter must reach to win
+                // Makes this tile un-accessible (status updated in Character script)
                 if(charStart)
                 {
                     CharStart = tile;
                     tile.IsWin = true;
+                    tile.IsAccessible = false;
                     charStart = false;
                 }
 
+                // Randomly allocates the robot starting tile
+                // Chance of robot start increases the closer it is to the last tile (euclidean distance)
                 if (robotStart)
                 {
                     float distanceToMax = Mathf.Sqrt(Mathf.Pow(Size.x - x, 2) + Mathf.Pow(Size.y - y, 2));
@@ -124,6 +124,10 @@ public class Environment : MonoBehaviour
                         robotStart = false;
                     }
                 }
+
+                // Randomly allocates the orc starting tile
+                // Chance of robot start increases the closer it is to the last tile (euclidean distance)
+                // Makes this tile un-accessible (status updated in the Orc script)
                 if (orcStart)
                 {
                     float distanceToMax = Mathf.Sqrt(Mathf.Pow(Size.x - x, 2) + Mathf.Pow(Size.y - y, 2));
@@ -132,6 +136,7 @@ public class Environment : MonoBehaviour
                     if (o > prob && isAccessible)
                     {
                         OrcStart = tile;
+                        tile.IsAccessible = false;
                         orcStart = false;
                     }
                 }
@@ -343,13 +348,23 @@ public class Environment : MonoBehaviour
         return result;
     }
 
+    // Given an Vector2 containing two integers, return the tile at that location in the map
     public EnvironmentTile GetTileAtPosition(Vector2Int position)
     {
-        int tile = position.x * position.y;
+        int tile = position.y + position.x * Size.y;
 
         EnvironmentTile result = mAll[tile];
 
         return result;
         
+    }
+
+    // Randomly returns a neighbouring tile to the tile given
+    public EnvironmentTile GetNeighbourTile(EnvironmentTile tile)
+    {
+        int numNeighbours = tile.Connections.Count;
+        int x = Random.Range(0, numNeighbours);
+
+        return tile.Connections[x];
     }
 }
