@@ -6,7 +6,9 @@ public class Character : MonoBehaviour
 {
     [SerializeField] private float SingleNodeMoveTime = 0.5f;
 
+    public int Health = 3;
     public EnvironmentTile CurrentPosition { get; set; }
+    public EnvironmentTile LastPosition { get; set; }
 
     private IEnumerator DoMove(Vector3 position, Vector3 destination)
     {
@@ -36,9 +38,14 @@ public class Character : MonoBehaviour
             Vector3 position = CurrentPosition.Position;
             for (int count = 0; count < route.Count; ++count)
             {
+                LastPosition = CurrentPosition;
                 Vector3 next = route[count].Position;
                 yield return DoMove(position, next);
                 CurrentPosition = route[count];
+                // Makes character current position un-accessible
+                CurrentPosition.IsAccessible = false;
+                //Makes character last position access-ible once character has moved on
+                LastPosition.IsAccessible = true;
                 position = next;
             }
         }

@@ -36,19 +36,24 @@ public class Robot : MonoBehaviour
             }
         }
     }
-
     private IEnumerator DoGoTo(List<EnvironmentTile> route)
     {
         // Move through each tile in the given route
         if (route != null)
         {
+            EnvironmentTile LastPosition = new EnvironmentTile();
             moving = true;
             Vector3 position = CurrentPosition.Position;
             for (int count = 0; count < route.Count; count++)
             {
+                LastPosition = CurrentPosition;
                 Vector3 next = route[count].Position;
                 yield return DoMove(position, next);
                 CurrentPosition = route[count];
+                // Makes character current position un-accessible
+                //CurrentPosition.IsAccessible = false;
+                //Makes character last position access-ible once character has moved on
+                //LastPosition.IsAccessible = true;
                 position = next;
             }
         }
