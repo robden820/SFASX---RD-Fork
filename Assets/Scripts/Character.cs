@@ -6,9 +6,16 @@ public class Character : MonoBehaviour
 {
     [SerializeField] private float SingleNodeMoveTime = 0.5f;
 
+    private Animator anim;
+
     public int Health = 3;
     public EnvironmentTile CurrentPosition { get; set; }
     public EnvironmentTile LastPosition { get; set; }
+
+    void Awake()
+    {
+        anim = GetComponent<Animator>();
+    }
 
     private IEnumerator DoMove(Vector3 position, Vector3 destination)
     {
@@ -32,6 +39,7 @@ public class Character : MonoBehaviour
 
     private IEnumerator DoGoTo(List<EnvironmentTile> route)
     {
+        anim.SetBool("isMoving", true);
         // Move through each tile in the given route
         if (route != null)
         {
@@ -42,13 +50,10 @@ public class Character : MonoBehaviour
                 Vector3 next = route[count].Position;
                 yield return DoMove(position, next);
                 CurrentPosition = route[count];
-                // Makes character current position un-accessible
-                CurrentPosition.IsAccessible = false;
-                //Makes character last position access-ible once character has moved on
-                LastPosition.IsAccessible = true;
                 position = next;
             }
         }
+        anim.SetBool("isMoving", false);
     }
 
     public void GoTo(List<EnvironmentTile> route)

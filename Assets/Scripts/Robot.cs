@@ -6,15 +6,22 @@ public class Robot : MonoBehaviour
 {
     [SerializeField] private float SingleNodeMoveTime = 0.5f;
 
-    public EnvironmentTile CurrentPosition { get; set; }
+    private Animator anim;
 
+    public EnvironmentTile CurrentPosition { get; set; }
     public bool activated { get; set; }
     public bool moving { get; set; }
 
     private void Awake()
     {
+        anim = GetComponent<Animator>();
         activated = false;
         moving = false;
+    }
+
+    private void Update()
+    {
+        anim.SetBool("isActivated", activated);
     }
 
     private IEnumerator DoMove(Vector3 position, Vector3 destination)
@@ -38,26 +45,22 @@ public class Robot : MonoBehaviour
     }
     private IEnumerator DoGoTo(List<EnvironmentTile> route)
     {
+        anim.SetBool("isMoving", true);
         // Move through each tile in the given route
         if (route != null)
         {
-            EnvironmentTile LastPosition = new EnvironmentTile();
             moving = true;
             Vector3 position = CurrentPosition.Position;
             for (int count = 0; count < route.Count; count++)
             {
-                LastPosition = CurrentPosition;
                 Vector3 next = route[count].Position;
                 yield return DoMove(position, next);
                 CurrentPosition = route[count];
-                // Makes character current position un-accessible
-                //CurrentPosition.IsAccessible = false;
-                //Makes character last position access-ible once character has moved on
-                //LastPosition.IsAccessible = true;
                 position = next;
             }
         }
         moving = false;
+        anim.SetBool("isMoving", false);
     }
 
     public void GoTo(List<EnvironmentTile> route)

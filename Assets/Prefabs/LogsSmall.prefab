@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2450241317707606213}
   - component: {fileID: 8159827720809321532}
   - component: {fileID: 7228575818001999334}
+  - component: {fileID: -6881832755938717922}
   m_Layer: 0
   m_Name: LogsSmall
   m_TagString: Untagged
@@ -93,6 +94,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b81c1a74f97fbca4a81350fa9f3bdddb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &-6881832755938717922
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7566432309934268640}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 5, y: 5, z: 5}
 --- !u!1001 &5812286017612518776
 PrefabInstance:
   m_ObjectHideFlags: 0

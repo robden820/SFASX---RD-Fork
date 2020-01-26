@@ -27,7 +27,6 @@ public class PlayerHealth : MonoBehaviour
 
         for (int i = -1; i < CurrentPlayerHealth - 1; i++)
         {
-            Debug.Log(i);
             Transform point = Instantiate(HealthIcon);
             Position.x = 150 + 75 * i;
             point.localPosition = Position;

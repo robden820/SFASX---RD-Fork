@@ -6,8 +6,9 @@ public class Orc : MonoBehaviour
 {
     [SerializeField] private float SingleNodeMoveTime = 0.5f;
 
-    public EnvironmentTile CurrentPosition { get; set; }
+    public Character mTarget { get; set; } 
 
+    public EnvironmentTile CurrentPosition { get; set; }
     public bool moving { get; set; }
     public bool spottedPlayer { get; set; }
     public bool trackingPlayer { get; set; }
@@ -24,40 +25,39 @@ public class Orc : MonoBehaviour
         // If orc is following the player then speed up
         if (spottedPlayer || trackingPlayer)
         {
-            SingleNodeMoveTime = 0.3f;
+            SingleNodeMoveTime = 0.4f;
         }
         else
         {
             SingleNodeMoveTime = 0.5f;
         }
+        // Test to see if the orc can see the player
+        RaycastHit hit;
 
-        // Uses raycasts for the orc to scan for the player
-        if (!spottedPlayer && !trackingPlayer)
+        Vector3 startPos = transform.position;
+        startPos.y += 1f;
+        Vector3 targetPos = mTarget.transform.position;
+        targetPos.y += 1f;
+        // If there is an unbroken line from orc to player
+        if (!Physics.Linecast(startPos, targetPos, out hit))
         {
-            Vector3 startPos = transform.position;
-            startPos.y += 0.05f;
-            float startAngle = 200 * -0.5f;
-            float endAngle = 200 * 0.5f;
-            float increment = 200 / 20;
-
-            RaycastHit hit;
-            // Scan within orcs field of vision
-            for (float i = startAngle; i <= endAngle; i += increment)
+            
+            // If player is within orcs line of sight
+            float angle = Vector3.Angle(startPos, targetPos);
+            if (angle < 60f && hit.distance < 20f)
             {
-                Vector3 targetPos = (Quaternion.Euler(0, i, 0) * transform.forward).normalized * 20f;
-
-                if (Physics.Raycast(startPos, targetPos, out hit, 20f))
+                // If orc isn't already following the player
+                if (!(spottedPlayer || trackingPlayer))
                 {
-                    // Test whether hit object is the player
-                    GameObject hitObject = hit.transform.gameObject;
-                    if (hitObject.tag == "Player")
-                    {
-                        Debug.DrawRay(startPos, targetPos * hit.distance, Color.red);
-                        spottedPlayer = true;
-                    }
+                    spottedPlayer = true;
                 }
             }
-        } 
+        }
+        else
+        {
+            spottedPlayer = false;
+            trackingPlayer = false;
+        }
     }
 
     private IEnumerator DoMove(Vector3 position, Vector3 destination)
@@ -85,19 +85,13 @@ public class Orc : MonoBehaviour
         // Move through each tile in the given route
         if (route != null)
         {
-            EnvironmentTile LastPosition = new EnvironmentTile();
             moving = true;
             Vector3 position = CurrentPosition.Position;
             for (int count = 0; count < route.Count; count++)
             {
-                LastPosition = CurrentPosition;
                 Vector3 next = route[count].Position;
                 yield return DoMove(position, next);
                 CurrentPosition = route[count];
-                // Makes character current position un-accessible
-                CurrentPosition.IsAccessible = false;
-                //Makes character last position access-ible once character has moved on
-                LastPosition.IsAccessible = true;
                 position = next;
             }
         }

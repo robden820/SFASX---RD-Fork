@@ -107,7 +107,6 @@ public class Environment : MonoBehaviour
                 {
                     CharStart = tile;
                     tile.IsWin = true;
-                    tile.IsAccessible = false;
                     charStart = false;
                 }
 
@@ -136,7 +135,6 @@ public class Environment : MonoBehaviour
                     if (o > prob && isAccessible)
                     {
                         OrcStart = tile;
-                        tile.IsAccessible = false;
                         orcStart = false;
                     }
                 }
